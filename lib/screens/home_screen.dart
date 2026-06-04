@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'my_profile_screen.dart';
 import 'todays_birthdays_screen.dart';
 import 'upcoming_birthdays_screen.dart';
+import 'search_users_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -63,6 +64,8 @@ class HomeScreen extends StatelessWidget {
 
             _buildTile(context, Icons.calendar_month, "Upcoming Birthdays"),
 
+            _buildTile(context, Icons.search, "Search Users"),
+
             _buildTile(context, Icons.favorite, "Well Wishes"),
 
             _buildTile(context, Icons.people, "WellWishers"),
@@ -73,13 +76,11 @@ class HomeScreen extends StatelessWidget {
 
             _buildTile(context, Icons.celebration, "Celebrity Birthdays"),
 
-            _buildTile(context, Icons.person, "My Profile"),
-
-            _buildTile(context, Icons.search, "Search Users"),
-
             _buildTile(context, Icons.notifications, "Notifications"),
 
             _buildTile(context, Icons.settings, "Settings"),
+
+            _buildTile(context, Icons.person, "My Profile"),
           ],
         ),
       ),
@@ -110,6 +111,11 @@ class HomeScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => const UpcomingBirthdaysScreen(),
               ),
+            );
+          } else if (title == "Search Users") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchUsersScreen()),
             );
           } else if (title == "My Profile") {
             Navigator.push(
