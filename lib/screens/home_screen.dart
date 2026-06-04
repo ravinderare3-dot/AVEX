@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'my_profile_screen.dart';
 import 'todays_birthdays_screen.dart';
+import 'upcoming_birthdays_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -98,15 +99,22 @@ class HomeScreen extends StatelessWidget {
           size: 16,
         ),
         onTap: () {
-          if (title == "My Profile") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const MyProfileScreen()),
-            );
-          } else if (title == "Today's Birthdays") {
+          if (title == "Today's Birthdays") {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const TodaysBirthdaysScreen()),
+            );
+          } else if (title == "Upcoming Birthdays") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const UpcomingBirthdaysScreen(),
+              ),
+            );
+          } else if (title == "My Profile") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MyProfileScreen()),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
