@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "761112745058",
+    "project_id": "avex-69c58",
+    "storage_bucket": "avex-69c58.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761112745058:android:3516205c1548199dfbad3b",
+        "android_client_info": {
+          "package_name": "com.example.avex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATmo0LhFpXYcR_yy8s1YG0iGiZrrmXAYY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
