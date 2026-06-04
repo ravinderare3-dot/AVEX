@@ -45,6 +45,8 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
       data.forEach((key, value) {
         final user = Map<String, dynamic>.from(value);
 
+        user["uid"] = key;
+
         if (currentUser != null && user["email"] != currentUser.email) {
           users.add(user);
         }
@@ -61,6 +63,39 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> sendRequest(Map<String, dynamic> receiver) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) return;
+
+      final receiverUid = receiver["uid"].toString();
+
+      await FirebaseDatabase.instanceFor(
+        app: FirebaseAuth.instance.app,
+        databaseURL:
+            "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
+      ).ref("wellwisher_requests/$receiverUid/${currentUser.uid}").set({
+        "senderUid": currentUser.uid,
+        "senderName": currentUser.displayName ?? "User",
+        "senderEmail": currentUser.email ?? "",
+        "status": "pending",
+      });
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("WellWisher Request Sent 🤝")),
+      );
+    } catch (e) {
+      print(e);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -106,7 +141,6 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: filteredUsers.isEmpty
                       ? const Center(
@@ -136,15 +170,7 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
                                   style: const TextStyle(color: Colors.white70),
                                 ),
                                 trailing: ElevatedButton(
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "WellWisher Request Sent",
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                  onPressed: () => sendRequest(user),
                                   child: const Text("Add"),
                                 ),
                               ),

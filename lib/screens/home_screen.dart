@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'my_profile_screen.dart';
 import 'todays_birthdays_screen.dart';
 import 'upcoming_birthdays_screen.dart';
 import 'search_users_screen.dart';
 import 'wellwisher_requests_screen.dart';
+import 'wellwishers_screen.dart';
+import 'my_profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -21,6 +22,7 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.black,
         actions: [
           IconButton(
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
 
@@ -28,7 +30,6 @@ class HomeScreen extends StatelessWidget {
                 Navigator.popUntil(context, (route) => route.isFirst);
               }
             },
-            icon: const Icon(Icons.logout),
           ),
         ],
       ),
@@ -69,9 +70,9 @@ class HomeScreen extends StatelessWidget {
 
             _buildTile(context, Icons.person_add, "WellWisher Requests"),
 
-            _buildTile(context, Icons.favorite, "Well Wishes"),
-
             _buildTile(context, Icons.people, "WellWishers"),
+
+            _buildTile(context, Icons.favorite, "Well Wishes"),
 
             _buildTile(context, Icons.star, "Respect Meter"),
 
@@ -126,6 +127,11 @@ class HomeScreen extends StatelessWidget {
               MaterialPageRoute(
                 builder: (_) => const WellWisherRequestsScreen(),
               ),
+            );
+          } else if (title == "WellWishers") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const WellWishersScreen()),
             );
           } else if (title == "My Profile") {
             Navigator.push(

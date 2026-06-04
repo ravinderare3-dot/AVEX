@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class WellWisherRequestsScreen extends StatefulWidget {
   const WellWisherRequestsScreen({super.key});
@@ -9,29 +11,115 @@ class WellWisherRequestsScreen extends StatefulWidget {
 }
 
 class _WellWisherRequestsScreenState extends State<WellWisherRequestsScreen> {
-  final List<Map<String, String>> requests = [
-    {"name": "Ravinder", "username": "ravinder03"},
-    {"name": "Shanker", "username": "shanker01"},
-  ];
+  List<Map<String, dynamic>> requests = [];
+  bool isLoading = true;
 
-  void acceptRequest(int index) {
-    setState(() {
-      requests.removeAt(index);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("WellWisher Request Accepted 🎉")),
-    );
+  @override
+  void initState() {
+    super.initState();
+    loadRequests();
   }
 
-  void rejectRequest(int index) {
-    setState(() {
-      requests.removeAt(index);
-    });
+  Future<void> loadRequests() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("WellWisher Request Rejected")),
-    );
+      if (currentUser == null) return;
+
+      final snapshot = await FirebaseDatabase.instanceFor(
+        app: FirebaseAuth.instance.app,
+        databaseURL:
+            "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
+      ).ref("wellwisher_requests/${currentUser.uid}").get();
+
+      if (!snapshot.exists) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
+      final data = Map<dynamic, dynamic>.from(snapshot.value as Map);
+
+      List<Map<String, dynamic>> loaded = [];
+
+      data.forEach((key, value) {
+        final request = Map<String, dynamic>.from(value);
+
+        loaded.add(request);
+      });
+
+      setState(() {
+        requests = loaded;
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> acceptRequest(Map<String, dynamic> request) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) return;
+
+      final senderUid = request["senderUid"].toString();
+
+      final db = FirebaseDatabase.instanceFor(
+        app: FirebaseAuth.instance.app,
+        databaseURL:
+            "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
+      );
+
+      await db.ref("wellwishers/${currentUser.uid}/$senderUid").set(true);
+
+      await db.ref("wellwishers/$senderUid/${currentUser.uid}").set(true);
+
+      await db
+          .ref("wellwisher_requests/${currentUser.uid}/$senderUid")
+          .remove();
+
+      loadRequests();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("WellWisher Added Successfully 🤝")),
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> rejectRequest(Map<String, dynamic> request) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) return;
+
+      final senderUid = request["senderUid"].toString();
+
+      await FirebaseDatabase.instanceFor(
+        app: FirebaseAuth.instance.app,
+        databaseURL:
+            "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
+      ).ref("wellwisher_requests/${currentUser.uid}/$senderUid").remove();
+
+      loadRequests();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Request Rejected")));
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -42,7 +130,9 @@ class _WellWisherRequestsScreenState extends State<WellWisherRequestsScreen> {
         title: const Text("WellWisher Requests"),
         backgroundColor: Colors.black,
       ),
-      body: requests.isEmpty
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : requests.isEmpty
           ? const Center(
               child: Text(
                 "No Pending Requests 🤝",
@@ -66,27 +156,24 @@ class _WellWisherRequestsScreenState extends State<WellWisherRequestsScreen> {
                             child: Icon(Icons.person),
                           ),
                           title: Text(
-                            request["name"]!,
+                            request["senderName"] ?? "",
                             style: const TextStyle(color: Colors.white),
                           ),
                           subtitle: Text(
-                            "@${request["username"]}",
+                            request["senderEmail"] ?? "",
                             style: const TextStyle(color: Colors.white70),
                           ),
                         ),
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             ElevatedButton(
-                              onPressed: () => acceptRequest(index),
+                              onPressed: () => acceptRequest(request),
                               child: const Text("Accept"),
                             ),
-
                             const SizedBox(width: 10),
-
                             OutlinedButton(
-                              onPressed: () => rejectRequest(index),
+                              onPressed: () => rejectRequest(request),
                               child: const Text("Reject"),
                             ),
                           ],
