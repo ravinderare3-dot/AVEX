@@ -56,7 +56,7 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print(e);
+      print("Search Error: $e");
 
       setState(() {
         isLoading = false;
@@ -136,8 +136,16 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
                                   style: const TextStyle(color: Colors.white70),
                                 ),
                                 trailing: ElevatedButton(
-                                  onPressed: () {},
-                                  child: const Text("View"),
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          "WellWisher Request Sent",
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text("Add"),
                                 ),
                               ),
                             );
