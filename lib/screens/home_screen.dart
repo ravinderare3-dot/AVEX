@@ -5,6 +5,7 @@ import 'my_profile_screen.dart';
 import 'todays_birthdays_screen.dart';
 import 'upcoming_birthdays_screen.dart';
 import 'search_users_screen.dart';
+import 'wellwisher_requests_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -66,6 +67,8 @@ class HomeScreen extends StatelessWidget {
 
             _buildTile(context, Icons.search, "Search Users"),
 
+            _buildTile(context, Icons.person_add, "WellWisher Requests"),
+
             _buildTile(context, Icons.favorite, "Well Wishes"),
 
             _buildTile(context, Icons.people, "WellWishers"),
@@ -116,6 +119,13 @@ class HomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const SearchUsersScreen()),
+            );
+          } else if (title == "WellWisher Requests") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const WellWisherRequestsScreen(),
+              ),
             );
           } else if (title == "My Profile") {
             Navigator.push(
