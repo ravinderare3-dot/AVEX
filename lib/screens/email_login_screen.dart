@@ -14,15 +14,15 @@ class EmailLoginScreen extends StatefulWidget {
 }
 
 class _EmailLoginScreenState extends State<EmailLoginScreen> {
-  final emailController = TextEditingController();
+  static const Color earthBrown = Color(0xFF5D4037);
 
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   bool isLoading = false;
 
   Future<void> login() async {
     final email = emailController.text.trim();
-
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
@@ -77,6 +77,25 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     }
   }
 
+  Future<void> forgotPassword() async {
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Enter your email first")));
+      return;
+    }
+
+    await AuthService().resetPassword(email);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Password reset email sent")));
+  }
+
   @override
   void dispose() {
     emailController.dispose();
@@ -86,72 +105,128 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const earthBrown = Color(0xFF5D4037);
-
     return Scaffold(
       backgroundColor: Colors.white,
 
-      appBar: AppBar(title: const Text("Login"), backgroundColor: Colors.white),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: earthBrown,
+        elevation: 0,
+        title: const Text("Login"),
+      ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
 
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-            const Icon(Icons.lock_open, size: 80, color: earthBrown),
+              const Icon(Icons.lock_open, size: 90, color: earthBrown),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
-            const Text(
-              "LOGIN",
-              style: TextStyle(
-                color: earthBrown,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+              const Text(
+                "LOGIN",
+                style: TextStyle(
+                  color: earthBrown,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 10),
 
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
+              const Text(
+                "Welcome back to AVEX",
+                style: TextStyle(color: Colors.black54, fontSize: 15),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 35),
 
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: "Email Address",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: earthBrown),
-                onPressed: isLoading ? null : login,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "LOGIN",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 10),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: forgotPassword,
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      color: earthBrown,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: earthBrown,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: isLoading ? null : login,
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "LOGIN",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "New User? Create Account",
+                  style: TextStyle(
+                    color: earthBrown,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

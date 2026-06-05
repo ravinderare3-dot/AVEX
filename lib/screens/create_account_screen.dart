@@ -10,25 +10,30 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
+  static const Color earthBrown = Color(0xFF5D4037);
+
   final emailController = TextEditingController();
-
   final passwordController = TextEditingController();
-
   final confirmPasswordController = TextEditingController();
 
   bool isLoading = false;
 
   Future<void> createAccount() async {
     final email = emailController.text.trim();
-
     final password = passwordController.text.trim();
-
     final confirmPassword = confirmPasswordController.text.trim();
 
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Fill all fields")));
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 6 characters")),
+      );
       return;
     }
 
@@ -45,9 +50,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
     final user = await AuthService().signUpWithEmail(email, password);
 
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
 
     if (user != null) {
       if (!mounted) return;
@@ -75,86 +82,126 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const earthBrown = Color(0xFF5D4037);
-
     return Scaffold(
       backgroundColor: Colors.white,
 
       appBar: AppBar(
-        title: const Text("Create Account"),
         backgroundColor: Colors.white,
+        foregroundColor: earthBrown,
+        elevation: 0,
+        title: const Text("Create Account"),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
 
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
 
-            const Icon(Icons.person_add, size: 80, color: earthBrown),
+              const Icon(Icons.person_add, size: 90, color: earthBrown),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
-            const Text(
-              "CREATE ACCOUNT",
-              style: TextStyle(
-                color: earthBrown,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+              const Text(
+                "CREATE ACCOUNT",
+                style: TextStyle(
+                  color: earthBrown,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 10),
 
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
+              const Text(
+                "Join your wellwishers community",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black54, fontSize: 15),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 35),
 
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: "Email Address",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            TextField(
-              controller: confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: "Confirm Password",
-                border: OutlineInputBorder(),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Password",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
               ),
-            ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: earthBrown),
-                onPressed: isLoading ? null : createAccount,
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "CREATE ACCOUNT",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
-                      ),
+              TextField(
+                controller: confirmPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Confirm Password",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 30),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: earthBrown,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: isLoading ? null : createAccount,
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          "CREATE ACCOUNT",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Already have an account? LOGIN",
+                  style: TextStyle(
+                    color: earthBrown,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
