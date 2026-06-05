@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+import 'send_wish_screen.dart';
+
 class SearchUsersScreen extends StatefulWidget {
   const SearchUsersScreen({super.key});
 
@@ -169,9 +171,36 @@ class _SearchUsersScreenState extends State<SearchUsersScreen> {
                                   "@${user["username"]}",
                                   style: const TextStyle(color: Colors.white70),
                                 ),
-                                trailing: ElevatedButton(
-                                  onPressed: () => sendRequest(user),
-                                  child: const Text("Add"),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => sendRequest(user),
+                                      child: const Text("Add"),
+                                    ),
+
+                                    const SizedBox(width: 8),
+
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.card_giftcard,
+                                        color: Colors.purpleAccent,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => SendWishScreen(
+                                              receiverName:
+                                                  user["profileName"] ?? "User",
+                                              receiverUid: user["uid"]
+                                                  .toString(),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
                               ),
                             );

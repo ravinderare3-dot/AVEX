@@ -12,10 +12,12 @@ class ProfileSetupScreen extends StatefulWidget {
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final TextEditingController nameController = TextEditingController();
+
   final TextEditingController usernameController = TextEditingController();
 
   String month = "January";
   String day = "1";
+
   bool isLoading = false;
 
   Future<void> saveProfile() async {
@@ -36,12 +38,21 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
       ).ref("users/${user.uid}").set({
         "profileName": nameController.text.trim(),
+
         "username": usernameController.text.trim(),
+
         "birthdayMonth": month,
+
         "birthdayDay": day,
+
         "email": user.email ?? "",
+
         "photoUrl": user.photoURL ?? "",
+
         "createdAt": DateTime.now().toIso8601String(),
+
+        // AVEX With Respect System
+        "withRespectPoints": 0,
       });
 
       if (!mounted) return;
@@ -76,12 +87,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+
       appBar: AppBar(
         title: const Text("Complete Profile"),
         backgroundColor: Colors.black,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(20),
+
         child: ListView(
           children: [
             const SizedBox(height: 20),
@@ -117,7 +131,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             const SizedBox(height: 20),
 
             DropdownButtonFormField<String>(
-              value: month,
+              initialValue: month,
               dropdownColor: Colors.black,
               style: const TextStyle(color: Colors.white),
               items: const [
@@ -144,7 +158,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             const SizedBox(height: 20),
 
             DropdownButtonFormField<String>(
-              value: day,
+              initialValue: day,
               dropdownColor: Colors.black,
               style: const TextStyle(color: Colors.white),
               items: List.generate(

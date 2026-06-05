@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class SendWishScreen extends StatefulWidget {
   final String receiverName;
+  final String receiverUid;
 
-  const SendWishScreen({super.key, required this.receiverName});
+  const SendWishScreen({
+    super.key,
+    required this.receiverName,
+    required this.receiverUid,
+  });
 
   @override
   State<SendWishScreen> createState() => _SendWishScreenState();
@@ -11,6 +18,8 @@ class SendWishScreen extends StatefulWidget {
 
 class _SendWishScreenState extends State<SendWishScreen> {
   final TextEditingController messageController = TextEditingController();
+
+  bool isSending = false;
 
   String selectedRespect = "Friend";
 
@@ -51,12 +60,76 @@ class _SendWishScreenState extends State<SendWishScreen> {
     );
   }
 
-  void sendWish() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Wish sent with $selectedRespect 💜")),
-    );
+  Future<void> sendWish() async {
+    try {
+      setState(() {
+        isSending = true;
+      });
 
-    Navigator.pop(context);
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) return;
+
+      final db = FirebaseDatabase.instanceFor(
+        app: FirebaseAuth.instance.app,
+        databaseURL:
+            "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
+      );
+
+      final points = respectPoints[selectedRespect] ?? 10;
+
+      final wishRef = db.ref("wishes/${widget.receiverUid}").push();
+
+      await wishRef.set({
+        "senderUid": currentUser.uid,
+        "senderName": currentUser.displayName ?? "User",
+        "senderEmail": currentUser.email ?? "",
+        "message": messageController.text.trim(),
+        "respectTitle": selectedRespect,
+        "respectPoints": points,
+        "timestamp": DateTime.now().millisecondsSinceEpoch,
+      });
+
+      final userSnapshot = await db.ref("users/${widget.receiverUid}").get();
+
+      if (userSnapshot.exists) {
+        final userData = Map<dynamic, dynamic>.from(userSnapshot.value as Map);
+
+        final currentPoints = userData["withRespectPoints"] ?? 0;
+
+        await db
+            .ref("users/${widget.receiverUid}/withRespectPoints")
+            .set(currentPoints + points);
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Wish sent with $selectedRespect 💜")),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      print(e);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSending = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -132,8 +205,10 @@ class _SendWishScreenState extends State<SendWishScreen> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: sendWish,
-                child: const Text("SEND WISH", style: TextStyle(fontSize: 18)),
+                onPressed: isSending ? null : sendWish,
+                child: isSending
+                    ? const CircularProgressIndicator()
+                    : const Text("SEND WISH", style: TextStyle(fontSize: 18)),
               ),
             ),
           ],

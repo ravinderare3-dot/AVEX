@@ -16,7 +16,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   int wellWishersCount = 0;
   int wishesCount = 0;
-  int respectScore = 0;
+
+  int withRespectPoints = 0;
+  int withRespectPercent = 0;
 
   @override
   void initState() {
@@ -36,9 +38,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
       );
 
-      final snapshot = await db.ref("users/${user.uid}").get();
+      final profileSnapshot = await db.ref("users/${user.uid}").get();
 
-      int count = 0;
+      int wellWisherCount = 0;
 
       final wellWishersSnapshot = await db.ref("wellwishers/${user.uid}").get();
 
@@ -47,18 +49,36 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           wellWishersSnapshot.value as Map,
         );
 
-        count = data.length;
+        wellWisherCount = data.length;
       }
 
-      if (snapshot.exists) {
+      int wishes = 0;
+
+      final wishesSnapshot = await db.ref("wishes/${user.uid}").get();
+
+      if (wishesSnapshot.exists) {
+        final data = Map<dynamic, dynamic>.from(wishesSnapshot.value as Map);
+
+        wishes = data.length;
+      }
+
+      if (profileSnapshot.exists) {
+        final profile = Map<dynamic, dynamic>.from(
+          profileSnapshot.value as Map,
+        );
+
+        final points = profile["withRespectPoints"] ?? 0;
+
         setState(() {
-          userData = snapshot.value as Map;
+          userData = profile;
 
-          wellWishersCount = count;
+          wellWishersCount = wellWisherCount;
 
-          wishesCount = 0;
+          wishesCount = wishes;
 
-          respectScore = count * 10;
+          withRespectPoints = points;
+
+          withRespectPercent = points ~/ 260;
 
           isLoading = false;
         });
@@ -102,14 +122,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       backgroundColor: Colors.black,
+
       appBar: AppBar(
         title: const Text("My Profile"),
         backgroundColor: Colors.black,
       ),
+
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -129,11 +149,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ),
                       child: CircleAvatar(
                         radius: 55,
-                        backgroundColor: Colors.purple.shade700,
+                        backgroundColor: Colors.purple,
                         child: Text(
                           (userData?["profileName"] ?? "R")[0].toUpperCase(),
                           style: const TextStyle(
-                            fontSize: 42,
+                            fontSize: 40,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -152,7 +172,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 5),
 
                     Text(
                       "@${userData?["username"] ?? ""}",
@@ -172,7 +192,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           color: Colors.purpleAccent,
                         ),
                         title: Text(
-                          user?.email ?? "",
+                          userData?["email"] ?? "",
                           style: const TextStyle(color: Colors.white),
                         ),
                       ),
@@ -198,21 +218,34 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         statBox(wellWishersCount.toString(), "WellWishers"),
+
                         statBox(wishesCount.toString(), "Wishes"),
-                        statBox(respectScore.toString(), "Respect"),
+
+                        statBox("$withRespectPercent%", "With Respect"),
                       ],
                     ),
 
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 30),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.edit),
-                        label: const Text("Edit Profile"),
+                    Card(
+                      color: Colors.grey.shade900,
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.workspace_premium,
+                          color: Colors.amber,
+                        ),
+                        title: Text(
+                          "$withRespectPercent%",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          "With Respect",
+                          style: TextStyle(color: Colors.white70),
+                        ),
                       ),
                     ),
                   ],
