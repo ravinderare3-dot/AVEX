@@ -11,7 +11,12 @@ class MyProfileScreen extends StatefulWidget {
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
   Map<dynamic, dynamic>? userData;
+
   bool isLoading = true;
+
+  int wellWishersCount = 0;
+  int wishesCount = 0;
+  int respectScore = 0;
 
   @override
   void initState() {
@@ -25,15 +30,36 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
       if (user == null) return;
 
-      final snapshot = await FirebaseDatabase.instanceFor(
+      final db = FirebaseDatabase.instanceFor(
         app: FirebaseAuth.instance.app,
         databaseURL:
             "https://avex-69c58-default-rtdb.asia-southeast1.firebasedatabase.app",
-      ).ref("users/${user.uid}").get();
+      );
+
+      final snapshot = await db.ref("users/${user.uid}").get();
+
+      int count = 0;
+
+      final wellWishersSnapshot = await db.ref("wellwishers/${user.uid}").get();
+
+      if (wellWishersSnapshot.exists) {
+        final data = Map<dynamic, dynamic>.from(
+          wellWishersSnapshot.value as Map,
+        );
+
+        count = data.length;
+      }
 
       if (snapshot.exists) {
         setState(() {
           userData = snapshot.value as Map;
+
+          wellWishersCount = count;
+
+          wishesCount = 0;
+
+          respectScore = count * 10;
+
           isLoading = false;
         });
       } else {
@@ -171,9 +197,9 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        statBox("0", "WellWishers"),
-                        statBox("0", "Wishes"),
-                        statBox("0", "Respect"),
+                        statBox(wellWishersCount.toString(), "WellWishers"),
+                        statBox(wishesCount.toString(), "Wishes"),
+                        statBox(respectScore.toString(), "Respect"),
                       ],
                     ),
 

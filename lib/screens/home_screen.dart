@@ -6,6 +6,7 @@ import 'upcoming_birthdays_screen.dart';
 import 'search_users_screen.dart';
 import 'wellwisher_requests_screen.dart';
 import 'wellwishers_screen.dart';
+import 'received_wishes_screen.dart';
 import 'my_profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -72,9 +73,11 @@ class HomeScreen extends StatelessWidget {
 
             _buildTile(context, Icons.people, "WellWishers"),
 
+            _buildTile(context, Icons.mail, "Received Wishes"),
+
             _buildTile(context, Icons.favorite, "Well Wishes"),
 
-            _buildTile(context, Icons.star, "Respect Meter"),
+            _buildTile(context, Icons.workspace_premium, "With Respect"),
 
             _buildTile(context, Icons.card_giftcard, "Advance Wishes"),
 
@@ -132,6 +135,11 @@ class HomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const WellWishersScreen()),
+            );
+          } else if (title == "Received Wishes") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReceivedWishesScreen()),
             );
           } else if (title == "My Profile") {
             Navigator.push(
